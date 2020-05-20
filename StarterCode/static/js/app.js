@@ -43,54 +43,78 @@ d3.json("samples.json").then((data)=> {
 function buildCharts(value) {
     d3.json("samples.json").then((data)=> {
 
-    // Grab values from the  json object to build the bubble chart and a pie chart
-        console.log(data.samples)
-    var metadata = data.metadata
-
-    var sampleIds = metadata.filter(row => row.id == value);    console.log(samplesOtuId);
-    
-         var x = data.samples.otu_ids;
-         console.log(x);
-         var y = data.samples.sample_values;
-         var size = data.sample_values;
-         var color = data.otu_ids;
-         var labels = data.otu_labels;
-      
-      var trace1 ={
-        x:x,
-        y:y,
-        text:labels,
-        mode:'markers',
-        marker:{
-          color: color,
-          size: size,
-          colorscale:"earth" 
-        }
-      };
-      var bubbleData = [trace1];
-      
-      var bubbleLayout = {
-        title: 'OTU IDS',
+    // get the values from the  json  to build the bubble chart and a pie chart
         
-      };
-      
-      Plotly.newPlot('bubble', bubbleData, bubbleLayout);
-});
-  // making a pie chart
-var trace = [{
-    values: x.slice(0,10), 
-    labels: labels.slice (0,10),
-    type: "pie"
-  }];
-  
-  var pieData = [trace];
 
-  var pieLayout = {
-    title: "'Top 10 OTU",
-};
-  Plotly.plot("pie", pieData, pieLayout);
+    var sampleIds = data.samples.filter(row => row.id == value); 
+    console.log(sampleIds)   
+    console.log(sampleIds[0]);
+    
+        //  var x = data.samples.otu_ids;
+        //  var y = data.samples.sample_values;
+
+    var sampleValues = sampleIds[0].sample_values
+    
+    var sampleLabels = sampleIds[0].otu_ids;
+    var sampleText = sampleIds[0].otu_labels
+    
+    // reference to the bubble in HTML File
+    var bubbleChart = d3.select('#bubble')
+    
+    // Object that contains data to be plotted 
+    var trace = {
+      x: sampleLabels,
+      y: sampleValues,
+      mode: 'markers',
+      text: sampleText,
+      marker: { 
+        size: sampleValues,
+        color: sampleLabels,
+        colorscale: 'Earth',
+      }
+    };
+
+    var layout = {
+      title: "Visualizing OTU-IDS",
+      height: 500
+    };
+
+    // Ploting the bubble chart 
+    var data = [trace];
+    Plotly.newPlot('bubble', data, layout)
+  
+
+
+  // making a pie chart
+
+    // getting a reference to the pie ID in HTML File
+    var pieGraph = d3.select('#pie')
+
+   // using the top 10 samples to make the pie chart...use slicing
+    var chartValues = sampleValues.slice(0, 10);
+    var chartLabels = sampleLabels.slice(0, 10);
+    var chartText = sampleText.slice(0, 10);
+
+    // Object that contains data to be plotted and specs for plotting
+    var data = [{
+      values: chartValues, 
+      labels: chartLabels,
+      type: "pie",
+      text: chartText 
+    }];
+
+    var layout = {
+      title: "Top 10 Samples",
+      height: 600, 
+      width: 450,
+      colorway: ['Portland'],
+    };
+
+// plotting the pie chart
+    Plotly.newPlot('pie', data, layout);
 
 }
+    )};
 
 function optionChanged(value) {
     buildMetadata(value)
