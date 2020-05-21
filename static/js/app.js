@@ -1,3 +1,9 @@
+// Observations
+
+    // The most common bacteria among people belly buttons is Staphylococcacea and Corynebacterium
+
+
+
 // selecting the selDataset of the html to append the dropdown menu 
    var dropDown = d3.select("#selDataset");
 //    reading the .json using d3
@@ -23,6 +29,9 @@ d3.json("samples.json").then((data)=> {
     console.log(data.metadata);
     var metadata = data.metadata
     var filteredMetadata = metadata.filter(row => row.id == value);
+
+    console.log("meta",filteredMetadata);
+
    var sampleMetadata =  filteredMetadata[0]
 
    // selecting the html sample-metadata section to add the metadata
@@ -45,23 +54,20 @@ function buildCharts(value) {
 
     // get the values from the  json  to build the bubble chart and a pie chart
         
-
+// filtering the data to get the sample IDs
     var sampleIds = data.samples.filter(row => row.id == value); 
     console.log(sampleIds)   
     console.log(sampleIds[0]);
-    
-        //  var x = data.samples.otu_ids;
-        //  var y = data.samples.sample_values;
 
     var sampleValues = sampleIds[0].sample_values
     
     var sampleLabels = sampleIds[0].otu_ids;
     var sampleText = sampleIds[0].otu_labels
+
+    // console.log(sampleText);
     
-    // reference to the bubble in HTML File
-    var bubbleChart = d3.select('#bubble')
     
-    // Object that contains data to be plotted 
+    // Object that contains data to plot the bubble chart
     var trace = {
       x: sampleLabels,
       y: sampleValues,
@@ -70,13 +76,13 @@ function buildCharts(value) {
       marker: { 
         size: sampleValues,
         color: sampleLabels,
-        colorscale: 'Earth',
+        colorscale: 'Portland',
       }
     };
 
     var layout = {
-      title: "Visualizing OTU-IDS",
-      height: 500
+      title: "OTU-IDS Visual",
+      height: 600
     };
 
     // Ploting the bubble chart 
@@ -87,39 +93,63 @@ function buildCharts(value) {
 
   // making a pie chart
 
-    // getting a reference to the pie ID in HTML File
-    var pieGraph = d3.select('#pie')
+   // using the top 10 samples to make the pie chart...use sorting function then slice the top 10
+    var chartValues = sampleValues.sort(function(a, b){return a - b}).slice(0,10);
+    console.log("top",chartValues);
+    var chartLabels = sampleLabels;
+    console.log("labels", chartLabels);
+    var chartText = sampleText;
 
-   // using the top 10 samples to make the pie chart...use slicing
-    var chartValues = sampleValues.slice(0, 10);
-    var chartLabels = sampleLabels.slice(0, 10);
-    var chartText = sampleText.slice(0, 10);
-
-    // Object that contains data to be plotted and specs for plotting
+    // Object that contains data to be plotted 
     var data = [{
       values: chartValues, 
       labels: chartLabels,
       type: "pie",
       text: chartText 
+
     }];
 
     var layout = {
       title: "Top 10 Samples",
-      height: 600, 
-      width: 450,
-      colorway: ['Portland'],
+      height: 400, 
+      width: 400,
+      colorway: ['Earth'],
     };
 
 // plotting the pie chart
     Plotly.newPlot('pie', data, layout);
 
+  // making the bar chart
+
+  var trace2 = {
+    x :chartValues,
+    y :chartLabels.map(labels => `otu ${labels}`), 
+    type : "bar",
+    orientation:'h'
+
+  }
+
+var data = [trace2];
+var layout = {
+  title: "Top 10 OTU IDS"
+};
+
+Plotly.newPlot("bar", data, layout);
+
 }
     )};
 
+    // code for when sample changes
+
 function optionChanged(value) {
+     
+  // firing the functions
+
     buildMetadata(value)
     buildCharts(value)
 };
+
+init ()
 
 
 
